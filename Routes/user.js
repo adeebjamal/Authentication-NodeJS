@@ -1,10 +1,17 @@
 const express = require("express");
 const md5 = require("md5");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
 // importing models
 const USER = require("../Models/user");
+
+// importing functions
+const verifyToken = require("../Authorization/JWT-decoder");
+
+// Global variables
+TOKEN_SECRET = "long-secret-string-with-alphanumeric-characters";
 
 // ---------- GET routes ----------
 router.get("/register", async(req,res)=> {
@@ -20,9 +27,19 @@ router.get("/login", async(req,res)=> {
 });
 
 router.get("/logout", async(req,res)=> {
+    // This destroys the saved JWT_token
+    res.clearCookie("JWT_token");
     res.render("homepage",{
         message: "Logout successful."
     });
+});
+
+router.get("/protected", verifyToken, async(req,res)=> {
+    result = {
+        email: req.user.email,
+        status: "Logged in"
+    }
+    res.json(result);
 });
 
 // ---------- POST routes ----------
@@ -93,6 +110,9 @@ router.post("/login", async(req,res)=> {
             });
             return;
         }
+        payload = {email: req.body.username};
+        const jwtToken = jwt.sign(payload,TOKEN_SECRET);
+        res.cookie("JWT_token", jwtToken);      // Sending the JWT to the client as a cookie.
         res.render("dashboard", {
             NAME: tempUser.name
         });
