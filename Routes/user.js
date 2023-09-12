@@ -9,6 +9,7 @@ const USER = require("../Models/user");
 
 // importing functions
 const verifyToken = require("../Authorization/JWT-decoder");
+const getLoginMiddleware = require("../Authorization/Login-middleware");
 
 // Global variables
 TOKEN_SECRET = "long-secret-string-with-alphanumeric-characters";
@@ -20,7 +21,7 @@ router.get("/register", async(req,res)=> {
     });
 });
 
-router.get("/login", async(req,res)=> {
+router.get("/login", getLoginMiddleware, async(req,res)=> {
     res.render("login",{
         message: ""
     });
